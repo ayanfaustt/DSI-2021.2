@@ -1,4 +1,5 @@
 import 'package:english_words/english_words.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -35,30 +36,47 @@ class _RandomWordsState extends State<RandomWords> {
   final _saved = <WordPair>{};
   final _biggerFont = const TextStyle(fontSize: 18);
   bool gridMode = false;
-  
-  Widget _buildRow(WordPair pair) {
+
+  Widget _buildRow(WordPair pair, int index) {
     final alreadySaved = _saved.contains(pair);
     return Card(
       child: ListTile(
-        title: Text(
-          pair.asPascalCase,
-          style: _biggerFont,
-        ),
-        trailing: Icon(
-          alreadySaved ? Icons.favorite : Icons.favorite_border,
-          color: alreadySaved ? Colors.red : null,
-          semanticLabel: alreadySaved ? 'Remove from saved' : 'Save',
-        ),
-        onTap: () {
-          setState(() {
-            if (alreadySaved) {
-              _saved.remove(pair);
-            } else {
-              _saved.add(pair);
-            }
-          });
-        },
-      ),
+          title: Text(
+            pair.asPascalCase,
+            style: _biggerFont,
+          ),
+          trailing: Wrap(
+            spacing: -15,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(
+                  alreadySaved ? Icons.favorite : Icons.favorite_border,
+                  color: alreadySaved ? Colors.red : null,
+                ),
+                tooltip: 'Save Name',
+                onPressed: () {
+                  setState(() {
+                    if (alreadySaved) {
+                      _saved.remove(pair);
+                    } else {
+                      _saved.add(pair);
+                    }
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(CupertinoIcons.delete),
+                  onPressed: () {
+                    setState(() {
+                      if (alreadySaved) {
+                        _saved.remove(_suggestions[index]);
+                      }
+                      _suggestions.removeAt(index);
+                    });
+                  }
+              )
+            ],
+          )),
     );
   }
 
@@ -94,6 +112,7 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,8 +129,7 @@ class _RandomWordsState extends State<RandomWords> {
       body: Column(
         children: [
           Container(
-            margin: EdgeInsets.all(10),
-            //padding: const EdgeInsets.symmetric(horizontal: 15),
+            margin: EdgeInsets.all(15),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -138,11 +156,11 @@ class _RandomWordsState extends State<RandomWords> {
                   _suggestions.addAll(generateWordPairs().take(10));
                 }
 
-                return _buildRow(_suggestions[i]);
+                return _buildRow(_suggestions[i], i);
               },
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: gridMode ? 2 : 1,
-                mainAxisExtent: 65,
+                mainAxisExtent: 75,
               ),
             ),
           ),
