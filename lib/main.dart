@@ -40,7 +40,7 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
-  final List<WordPair> repo = Repository(generateWordPairs().take(20)).word.toList();
+  final repo = Repository(generateWordPairs().take(20)).word.toList();
   final _saved = <WordPair>{};
   final _biggerFont = const TextStyle(fontSize: 18);
   bool gridMode = false;
@@ -86,7 +86,7 @@ class _RandomWordsState extends State<RandomWords> {
                       _saved.remove(_suggestions[index]);
                     }
                     // _suggestions.removeAt(index);
-                    repo.removeAt(index);
+                    // repo.removeAt(index);
                   });
                 })
           ],

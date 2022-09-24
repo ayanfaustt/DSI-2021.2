@@ -30,7 +30,9 @@ class _EditarState extends State<Editar> {
 
   @override
   Widget build(BuildContext context) {
+
     final arguments = ModalRoute.of(context)!.settings.arguments as Arguments;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editor de Palavras'),
