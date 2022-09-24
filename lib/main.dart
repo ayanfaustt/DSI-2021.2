@@ -40,8 +40,7 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
-  // final teste = generateWordPairs().take(20);
-  final repo = Repository(generateWordPairs().take(20)).word.toList();
+  final List<WordPair> repo = Repository(generateWordPairs().take(20)).word.toList();
   final _saved = <WordPair>{};
   final _biggerFont = const TextStyle(fontSize: 18);
   bool gridMode = false;
@@ -49,10 +48,9 @@ class _RandomWordsState extends State<RandomWords> {
 
   Widget _buildRow(WordPair pair, int index) {
     final alreadySaved = _saved.contains(pair);
-    // var  teste = new Repository(generateWordPairs().take(20));
     return InkWell(
       onTap: () => {
-        Navigator.pushNamed(context, '/editar',
+        Navigator.pushNamed(context, "/editar",
         arguments: Arguments(repo[index]) )
       },
 
