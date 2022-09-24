@@ -1,9 +1,36 @@
+import 'dart:io';
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:startup_namer/editar_palavra.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  final repo2 = Repository(generateWordPairs().take(20)).word.toList();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  var storage = FirebaseFirestore.instance.collection('words');
+
+
+  var count = 0;
+
+  repo2.forEach((value){
+    // print(value.first.runtimeType);
+      storage.doc('$count').set({
+        'word': value.first + value.second
+      }); 
+      count += 1; 
+
+    }
+  );
+
   runApp(const MyApp());
 }
 
@@ -42,15 +69,39 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
-  final _saved = <WordPair>{};
+  final _saved = [];
   final repo = Repository(generateWordPairs().take(20)).word.toList();
   final _biggerFont = const TextStyle(fontSize: 18);
   bool gridMode = false;
   int wordCount = 20;
+  List<String> userData = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    _getUserData();
+    super.initState();
+  }
+
+
+  _getUserData() async {
+    // final ref = FirebaseDatabase.instance.ref('users/${id}');
+    FirebaseFirestore.instance.collection('words').get().then((value){
+
+      value.docs.toList().forEach((e){
+        setState(() {
+          userData.add(e.data().values.toString());
+        });      
+      });
+
+      
+    });
+  }
 
 
 
-  Future<dynamic> _builderDialog(BuildContext context){
+
+  Future<dynamic> _builderDialog(BuildContext context, userData){
 
     var newWord;
 
@@ -72,9 +123,15 @@ class _RandomWordsState extends State<RandomWords> {
               child: const Text("criar"),
               onPressed: (){
                 setState(() {
-                  var aux = WordPair(newWord, '.');
-                  repo.add(aux);
+                  // var aux = WordPair(newWord, '.');
+                  // repo.add(aux);
+                  userData.add(newWord);
                 });
+                var storage = FirebaseFirestore.instance.collection('words');
+                storage.doc('${userData.length}').set({
+                  'word': newWord
+                }); 
+
               },
             )
           ],
@@ -84,7 +141,7 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
-  Widget _buildRow(WordPair pair, int index) {
+  Widget _buildRow(String pair, int index) {
     final alreadySaved = _saved.contains(pair);
     return InkWell(
       onTap: () => {
@@ -94,7 +151,7 @@ class _RandomWordsState extends State<RandomWords> {
 
       child: ListTile(
         title: Text(
-          pair.asPascalCase,
+          pair,
           style: _biggerFont,
         ),
         trailing: Wrap(
@@ -124,7 +181,11 @@ class _RandomWordsState extends State<RandomWords> {
                       _saved.remove(_suggestions[index]);
                     }
                     // _suggestions.removeAt(index);
-                    repo.removeAt(index);
+                    // repo.removeAt(index);
+                    userData.remove(pair);
+                    var storage = FirebaseFirestore.instance.collection('words');
+                    storage.doc('${userData.length}').delete(); 
+
                   });
                 })
           ],
@@ -141,7 +202,7 @@ class _RandomWordsState extends State<RandomWords> {
             (pair) {
               return ListTile(
                 title: Text(
-                  pair.asPascalCase,
+                  pair,
                   style: _biggerFont,
                 ),
               );
@@ -184,7 +245,7 @@ class _RandomWordsState extends State<RandomWords> {
               color: Colors.white,
             ),
             onPressed: () {
-               _builderDialog(context);
+               _builderDialog(context, userData);
             },
       ),
       body: Column(
@@ -212,14 +273,16 @@ class _RandomWordsState extends State<RandomWords> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(10),
-              itemCount: repo.length,
+              itemCount: userData.length,
               itemBuilder: (context, int i) {
                 // if (i >= _suggestions.length) {
                 //   _suggestions.addAll(generateWordPairs().take(10));
                 // }
 
                 // return _buildRow(_suggestions[i], i);
-                return _buildRow(repo.elementAt(i), i);
+                print('tamanho: ${userData.length}');
+                print(i);
+                return _buildRow(userData.elementAt(i), i);
               },
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: gridMode ? 2 : 1,
