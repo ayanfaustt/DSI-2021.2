@@ -1,6 +1,7 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:startup_namer/editar_palavra.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,11 +21,17 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: RandomWords(),
+      initialRoute: '/',
+      routes: {
+        // '/': (context) => const MyApp(),
+        Editar.routeName:(context) => const Editar(),
+      },
     );
   }
 }
 
 class RandomWords extends StatefulWidget {
+  static const routeName = '/';
   const RandomWords({Key? key}) : super(key: key);
 
   @override
@@ -33,50 +40,60 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
+  // final teste = generateWordPairs().take(20);
+  final repo = Repository(generateWordPairs().take(20)).word.toList();
   final _saved = <WordPair>{};
   final _biggerFont = const TextStyle(fontSize: 18);
   bool gridMode = false;
+  int wordCount = 20;
 
   Widget _buildRow(WordPair pair, int index) {
     final alreadySaved = _saved.contains(pair);
-    return Card(
+    // var  teste = new Repository(generateWordPairs().take(20));
+    return InkWell(
+      onTap: () => {
+        Navigator.pushNamed(context, '/editar',
+        arguments: Arguments(repo[index]) )
+      },
+
       child: ListTile(
-          title: Text(
-            pair.asPascalCase,
-            style: _biggerFont,
-          ),
-          trailing: Wrap(
-            spacing: -15,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(
-                  alreadySaved ? Icons.favorite : Icons.favorite_border,
-                  color: alreadySaved ? Colors.red : null,
-                ),
-                tooltip: 'Save Name',
+        title: Text(
+          pair.asPascalCase,
+          style: _biggerFont,
+        ),
+        trailing: Wrap(
+          spacing: -15,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(
+                alreadySaved ? Icons.favorite : Icons.favorite_border,
+                color: alreadySaved ? Colors.red : null,
+              ),
+              tooltip: 'Save Name',
+              onPressed: () {
+                setState(() {
+                  if (alreadySaved) {
+                    _saved.remove(pair);
+                  } else {
+                    _saved.add(pair);
+                  }
+                });
+              },
+            ),
+            IconButton(
+                icon: const Icon(CupertinoIcons.delete),
                 onPressed: () {
                   setState(() {
                     if (alreadySaved) {
-                      _saved.remove(pair);
-                    } else {
-                      _saved.add(pair);
+                      _saved.remove(_suggestions[index]);
                     }
+                    // _suggestions.removeAt(index);
+                    repo.removeAt(index);
                   });
-                },
-              ),
-              IconButton(
-                icon: const Icon(CupertinoIcons.delete),
-                  onPressed: () {
-                    setState(() {
-                      if (alreadySaved) {
-                        _saved.remove(_suggestions[index]);
-                      }
-                      _suggestions.removeAt(index);
-                    });
-                  }
-              )
-            ],
-          )),
+                })
+          ],
+        ),
+      ),
     );
   }
 
@@ -112,7 +129,6 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +145,7 @@ class _RandomWordsState extends State<RandomWords> {
       body: Column(
         children: [
           Container(
-            margin: EdgeInsets.all(15),
+            margin: const EdgeInsets.all(15),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -151,12 +167,14 @@ class _RandomWordsState extends State<RandomWords> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(10),
+              itemCount: repo.length,
               itemBuilder: (context, int i) {
-                if (i >= _suggestions.length) {
-                  _suggestions.addAll(generateWordPairs().take(10));
-                }
+                // if (i >= _suggestions.length) {
+                //   _suggestions.addAll(generateWordPairs().take(10));
+                // }
 
-                return _buildRow(_suggestions[i], i);
+                // return _buildRow(_suggestions[i], i);
+                return _buildRow(repo.elementAt(i), i);
               },
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: gridMode ? 2 : 1,
