@@ -38,13 +38,51 @@ class RandomWords extends StatefulWidget {
   State<RandomWords> createState() => _RandomWordsState();
 }
 
+
+
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
-  final repo = Repository(generateWordPairs().take(20)).word.toList();
   final _saved = <WordPair>{};
+  final repo = Repository(generateWordPairs().take(20)).word.toList();
   final _biggerFont = const TextStyle(fontSize: 18);
   bool gridMode = false;
   int wordCount = 20;
+
+
+
+  Future<dynamic> _builderDialog(BuildContext context){
+
+    var newWord;
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const  Text('Criar nova Palavra'),
+          content: TextField(
+            onChanged: (value) {
+              setState(() {
+                newWord = value;
+              });
+            },
+          ),
+          actions: [
+            MaterialButton(
+              elevation: 5.0,
+              child: const Text("criar"),
+              onPressed: (){
+                setState(() {
+                  var aux = WordPair(newWord, '.');
+                  repo.add(aux);
+                });
+              },
+            )
+          ],
+
+        );
+      }
+    );
+  }
 
   Widget _buildRow(WordPair pair, int index) {
     final alreadySaved = _saved.contains(pair);
@@ -86,7 +124,7 @@ class _RandomWordsState extends State<RandomWords> {
                       _saved.remove(_suggestions[index]);
                     }
                     // _suggestions.removeAt(index);
-                    // repo.removeAt(index);
+                    repo.removeAt(index);
                   });
                 })
           ],
@@ -139,6 +177,15 @@ class _RandomWordsState extends State<RandomWords> {
             tooltip: "Saved Suggestions",
           )
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+            child: const Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+            onPressed: () {
+               _builderDialog(context);
+            },
       ),
       body: Column(
         children: [

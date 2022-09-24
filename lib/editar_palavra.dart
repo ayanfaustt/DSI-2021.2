@@ -10,7 +10,9 @@ class Arguments {
 
 class Repository {
   Iterable<WordPair> word;
+
   Repository(this.word);
+
 }
 
 
